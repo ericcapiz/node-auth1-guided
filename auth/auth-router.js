@@ -21,6 +21,7 @@ router.post('/login',async (req, res)=>{
     try{
         const user = await users.findBy({username}).first();
         if(user && bcrypt.compareSync(password, user.password)){
+            req.session.user = user;
             res.status(200).json({message: `welcome ${user.username}`})
         } else{
             res.status(401).json({message: 'invalid creds'})
@@ -31,5 +32,18 @@ router.post('/login',async (req, res)=>{
     }
 })
 
+router.get('/logout', (req, res)=>{
+    if(req.session && req.session.user){
+        req.session.destroy(err=>{
+            if(err){
+                res.send('unable to logout')
+            } else {
+                res.send('logout successs')
+            }
+        })
+    } else {
+        res.end();
+    }
+})
 
 module.exports = router;
